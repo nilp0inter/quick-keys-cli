@@ -69,7 +69,7 @@ fn to_array(a: &[u8]) -> [u8; 32] {
 
 fn mkcmd_set_key_text(key: u8, text: &str) -> [u8; 32] {
     let mut body = [0u8; 32];
-    body[..6].clone_from_slice(&[0x02, 0xb1, 0x00, key + 1, 0x00, (if text.len() <= 8 {text.len()*2} else {8}) as u8]);
+    body[..6].clone_from_slice(&[0x02, 0xb1, 0x00, key + 1, 0x00, (if text.len() <= 8 {text.len()*2} else {16}) as u8]);
 
     let mut payload = text.encode_utf16().flat_map(|c| c.to_le_bytes()).collect::<Vec<u8>>();
     payload.resize(16, 0);
