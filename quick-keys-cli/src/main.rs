@@ -1,7 +1,8 @@
+#![allow(dead_code)]
 extern crate hidapi;
 
 use std::{thread,time};
-use hidapi::HidApi;
+use hidapi::{HidApi};
 
 fn pad_zeroes<const A:usize, const B:usize>(arr:[u8;A])->[u8;B]{
     assert!(B >= A);
@@ -63,10 +64,6 @@ fn mkcmd_set_wheel_color(r: u8, g: u8, b: u8) -> [u8; 32] {
     pad_zeroes([0x02, 0xb4, 0x01, 0x01, 0x00, 0x00, r, g, b])
 }
 
-fn to_array(a: &[u8]) -> [u8; 32] {
-    a[..32].try_into().unwrap()
-}
-
 fn mkcmd_set_key_text(key: u8, text: &str) -> [u8; 32] {
     let mut body = [0u8; 32];
     body[..6].clone_from_slice(&[0x02, 0xb1, 0x00, key + 1, 0x00, (if text.len() <= 8 {text.len()*2} else {16}) as u8]);
@@ -104,16 +101,16 @@ enum WheelDirection {
 
 #[derive(Debug)]
 struct ButtonState {
-    Button0: bool,
-    Button1: bool,
-    Button2: bool,
-    Button3: bool,
-    Button4: bool,
-    Button5: bool,
-    Button6: bool,
-    Button7: bool,
-    ButtonExtra: bool,
-    ButtonWheel: bool,
+    button_0: bool,
+    button_1: bool,
+    button_2: bool,
+    button_3: bool,
+    button_4: bool,
+    button_5: bool,
+    button_6: bool,
+    button_7: bool,
+    button_extra: bool,
+    button_wheel: bool,
 }
 
 #[derive(Debug)]
@@ -127,25 +124,25 @@ enum Event {
 fn process_input(data: &[u8; 16]) -> Event {
     if data[0] == 0x02 {
         if data[1] == 0xf0 {
-            let wheelByte = data[7];
-            if wheelByte & 0x01 > 0 {
+            let wheel_byte = data[7];
+            if wheel_byte & 0x01 > 0 {
                 Event::Wheel { direction: WheelDirection::Right }
-            } else if wheelByte & 0x02 > 0 {
+            } else if wheel_byte & 0x02 > 0 {
                 Event::Wheel { direction: WheelDirection::Left }
             } else {
                 let keys1 = data[2];
                 let keys2 = data[3];
                 Event:: Button { state: ButtonState {
-                    Button0: keys1 & (1 << 0) > 0,
-                    Button1: keys1 & (1 << 1) > 0,
-                    Button2: keys1 & (1 << 2) > 0,
-                    Button3: keys1 & (1 << 3) > 0,
-                    Button4: keys1 & (1 << 4) > 0,
-                    Button5: keys1 & (1 << 5) > 0,
-                    Button6: keys1 & (1 << 6) > 0,
-                    Button7: keys1 & (1 << 7) > 0,
-                    ButtonExtra: keys2 & (1 << 0) > 0,
-                    ButtonWheel: keys2 & (1 << 1) > 0,
+                    button_0: keys1 & (1 << 0) > 0,
+                    button_1: keys1 & (1 << 1) > 0,
+                    button_2: keys1 & (1 << 2) > 0,
+                    button_3: keys1 & (1 << 3) > 0,
+                    button_4: keys1 & (1 << 4) > 0,
+                    button_5: keys1 & (1 << 5) > 0,
+                    button_6: keys1 & (1 << 6) > 0,
+                    button_7: keys1 & (1 << 7) > 0,
+                    button_extra: keys2 & (1 << 0) > 0,
+                    button_wheel: keys2 & (1 << 1) > 0,
                 }}
             }
         } else if data[0] == 0xf2 && data[2] == 0x01 {
@@ -160,9 +157,9 @@ fn process_input(data: &[u8; 16]) -> Event {
 
 fn main() {
     println!("Printing all available hid devices:");
-    let maybeApi = hidapi::HidApi::new();
+    let maybe_api = HidApi::new();
 
-    match maybeApi {
+    match maybe_api {
         Ok(api) => {
             for device in api.device_list() {
                 let vid = device.vendor_id();
@@ -206,15 +203,15 @@ fn main() {
                     match ev {
                         Event::Wheel { direction: WheelDirection::Left } => dev.write(&mkcmd_set_wheel_color(255, 0, 0)).unwrap(),
                         Event::Wheel { direction: WheelDirection::Right } => dev.write(&mkcmd_set_wheel_color(0, 255, 0)).unwrap(),
-                        Event::Button { state: ButtonState { ButtonWheel: true, .. } } => dev.write(&mkcmd_set_wheel_color(0, 0, 255)).unwrap(),
-                        Event::Button { state: ButtonState { Button0: true, .. } } => dev.write(&mkcmd_set_wheel_color(255, 0, 0)).unwrap(),
-                        Event::Button { state: ButtonState { Button1: true, .. } } => dev.write(&mkcmd_set_wheel_color(0, 255, 0)).unwrap(),
-                        Event::Button { state: ButtonState { Button2: true, .. } } => dev.write(&mkcmd_set_wheel_color(0, 0, 255)).unwrap(),
-                        Event::Button { state: ButtonState { Button3: true, .. } } => dev.write(&mkcmd_set_wheel_color(255, 255, 0)).unwrap(),
-                        Event::Button { state: ButtonState { Button4: true, .. } } => dev.write(&mkcmd_set_wheel_color(255, 0, 255)).unwrap(),
-                        Event::Button { state: ButtonState { Button5: true, .. } } => dev.write(&mkcmd_set_wheel_color(0, 255, 255)).unwrap(),
-                        Event::Button { state: ButtonState { Button6: true, .. } } => dev.write(&mkcmd_set_wheel_color(255, 255, 255)).unwrap(),
-                        Event::Button { state: ButtonState { Button7: true, .. } } => dev.write(&mkcmd_set_wheel_color(0, 0, 0)).unwrap(),
+                        Event::Button { state: ButtonState { button_wheel: true, .. } } => dev.write(&mkcmd_set_wheel_color(0, 0, 255)).unwrap(),
+                        Event::Button { state: ButtonState { button_0: true, .. } } => dev.write(&mkcmd_set_wheel_color(255, 0, 0)).unwrap(),
+                        Event::Button { state: ButtonState { button_1: true, .. } } => dev.write(&mkcmd_set_wheel_color(0, 255, 0)).unwrap(),
+                        Event::Button { state: ButtonState { button_2: true, .. } } => dev.write(&mkcmd_set_wheel_color(0, 0, 255)).unwrap(),
+                        Event::Button { state: ButtonState { button_3: true, .. } } => dev.write(&mkcmd_set_wheel_color(255, 255, 0)).unwrap(),
+                        Event::Button { state: ButtonState { button_4: true, .. } } => dev.write(&mkcmd_set_wheel_color(255, 0, 255)).unwrap(),
+                        Event::Button { state: ButtonState { button_5: true, .. } } => dev.write(&mkcmd_set_wheel_color(0, 255, 255)).unwrap(),
+                        Event::Button { state: ButtonState { button_6: true, .. } } => dev.write(&mkcmd_set_wheel_color(255, 255, 255)).unwrap(),
+                        Event::Button { state: ButtonState { button_7: true, .. } } => dev.write(&mkcmd_set_wheel_color(0, 0, 0)).unwrap(),
                         _ => 0,
                     };
                 }
