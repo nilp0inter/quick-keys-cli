@@ -178,19 +178,19 @@ fn main() {
 
                 dev.write(&mkcmd_subscribe_to_key_events()).unwrap();
                 dev.write(&mkcmd_subscribe_to_battery()).unwrap();
-                dev.write(&mkcmd_rotate_screen(ScreenOrientation::Rotate180)).unwrap();
+                dev.write(&mkcmd_rotate_screen(ScreenOrientation::Rotate270)).unwrap();
                 dev.write(&mkcmd_set_screen_brightness(ScreenBrightness::Low)).unwrap();
                 dev.write(&mkcmd_set_wheel_speed(WheelSpeed::Normal)).unwrap();
                 dev.write(&mkcmd_set_sleep_timeout(1)).unwrap();
                 dev.write(&mkcmd_set_wheel_color(255, 0, 0)).unwrap();
-                dev.write(&mkcmd_set_key_text(0, "holii")).unwrap();
-                dev.write(&mkcmd_set_key_text(1, "caracoli")).unwrap();
-                dev.write(&mkcmd_set_key_text(2, "como")).unwrap();
-                dev.write(&mkcmd_set_key_text(3, "va")).unwrap();
-                dev.write(&mkcmd_set_key_text(4, "eso?")).unwrap();
-                dev.write(&mkcmd_set_key_text(5, "tu$cara")).unwrap();
-                dev.write(&mkcmd_set_key_text(6, "es$queso")).unwrap();
-                dev.write(&mkcmd_set_key_text(7, "jiji")).unwrap();
+                dev.write(&mkcmd_set_key_text(0, "red")).unwrap();
+                dev.write(&mkcmd_set_key_text(1, "green")).unwrap();
+                dev.write(&mkcmd_set_key_text(2, "blue")).unwrap();
+                dev.write(&mkcmd_set_key_text(3, "yellow")).unwrap();
+                dev.write(&mkcmd_set_key_text(4, "purple")).unwrap();
+                dev.write(&mkcmd_set_key_text(5, "turquoise")).unwrap();
+                dev.write(&mkcmd_set_key_text(6, "white")).unwrap();
+                dev.write(&mkcmd_set_key_text(7, "off")).unwrap();
 
                 thread::sleep(time::Duration::from_millis(1000));
                 for chunk in &mkcmd_show_overlay_text(2, "This is an overlay!") {
@@ -207,6 +207,14 @@ fn main() {
                         Event::Wheel { direction: WheelDirection::Left } => dev.write(&mkcmd_set_wheel_color(255, 0, 0)).unwrap(),
                         Event::Wheel { direction: WheelDirection::Right } => dev.write(&mkcmd_set_wheel_color(0, 255, 0)).unwrap(),
                         Event::Button { state: ButtonState { ButtonWheel: true, .. } } => dev.write(&mkcmd_set_wheel_color(0, 0, 255)).unwrap(),
+                        Event::Button { state: ButtonState { Button0: true, .. } } => dev.write(&mkcmd_set_wheel_color(255, 0, 0)).unwrap(),
+                        Event::Button { state: ButtonState { Button1: true, .. } } => dev.write(&mkcmd_set_wheel_color(0, 255, 0)).unwrap(),
+                        Event::Button { state: ButtonState { Button2: true, .. } } => dev.write(&mkcmd_set_wheel_color(0, 0, 255)).unwrap(),
+                        Event::Button { state: ButtonState { Button3: true, .. } } => dev.write(&mkcmd_set_wheel_color(255, 255, 0)).unwrap(),
+                        Event::Button { state: ButtonState { Button4: true, .. } } => dev.write(&mkcmd_set_wheel_color(255, 0, 255)).unwrap(),
+                        Event::Button { state: ButtonState { Button5: true, .. } } => dev.write(&mkcmd_set_wheel_color(0, 255, 255)).unwrap(),
+                        Event::Button { state: ButtonState { Button6: true, .. } } => dev.write(&mkcmd_set_wheel_color(255, 255, 255)).unwrap(),
+                        Event::Button { state: ButtonState { Button7: true, .. } } => dev.write(&mkcmd_set_wheel_color(0, 0, 0)).unwrap(),
                         _ => 0,
                     };
                 }
